@@ -148,7 +148,7 @@ const AIAdvisoryInterface = () => {
   ) => {
     try {
       const response = await fetch(
-        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
+        "https://n8n.estdev.cloud/webhook-test/8d5563f9-d123-4b03-8de5-923dce86e6d8",
         {
           method: "POST",
           headers: {
