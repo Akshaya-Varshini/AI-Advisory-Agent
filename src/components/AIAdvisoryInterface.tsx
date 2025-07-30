@@ -130,7 +130,7 @@ const AIAdvisoryInterface = () => {
 
   const sendToN8n = async (message: string, companyId: string, userId: string) => {
     try {
-      const response = await fetch('https://n8n.estdev.cloud/webhook-test/764bc6fc-9bca-4b28-a1fe-e5e7f092229e', {
+      const response = await fetch('https://n8n.estdev.cloud/webhook-test/8d5563f9-d123-4b03-8de5-923dce86e6d8', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
