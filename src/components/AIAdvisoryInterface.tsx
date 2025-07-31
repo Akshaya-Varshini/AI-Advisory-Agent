@@ -147,8 +147,13 @@ const AIAdvisoryInterface = () => {
     userId: string
   ) => {
     try {
+      const proxyUrl =
+        "https://tiny-proxy-cv6gfztz6-akshayaas-projects-41a61f91.vercel.app/api/proxy";
+      const targetUrl =
+        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8";
+
       const response = await fetch(
-        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
+        `${proxyUrl}?url=${encodeURIComponent(targetUrl)}`,
         {
           method: "POST",
           headers: {
