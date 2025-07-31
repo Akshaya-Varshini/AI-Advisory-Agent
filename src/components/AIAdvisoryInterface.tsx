@@ -141,19 +141,10 @@ const AIAdvisoryInterface = () => {
     return interval;
   };
 
-  const sendToN8n = async (
-    message: string,
-    companyId: string,
-    userId: string
-  ) => {
+  const sendToN8n = async (message, companyId, userId) => {
     try {
-      const proxyUrl =
-        "https://tiny-proxy-cv6gfztz6-akshayaas-projects-41a61f91.vercel.app/api/proxy";
-      const targetUrl =
-        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8";
-
       const response = await fetch(
-        `${proxyUrl}?url=${encodeURIComponent(targetUrl)}`,
+        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
         {
           method: "POST",
           headers: {
@@ -171,11 +162,11 @@ const AIAdvisoryInterface = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.text();
-      return data;
-    } catch (error) {
-      console.error("Error sending to n8n:", error);
-      throw error;
+      const result = await response.text();
+      return result;
+    } catch (err) {
+      console.error("Error sending to n8n:", err);
+      throw err;
     }
   };
 
