@@ -141,32 +141,62 @@ const AIAdvisoryInterface = () => {
     return interval;
   };
 
-  const sendToN8n = async (message, companyId, userId) => {
-    try {
-      const response = await fetch(
-        "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            company_id: companyId,
-            user_id: userId,
-            message: message,
-          }),
+  const sendToN8n = async (message, companyId, userId, retries = 3) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`Attempt ${attempt} - Sending request to n8n workflow...`);
+
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+        const response = await fetch(
+          "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: `Company ID: ${companyId}, User ID: ${userId}, Message: ${message}`,
+            }),
+            signal: controller.signal, // Add abort signal
+          }
+        );
+
+        clearTimeout(timeoutId); // Clear timeout if request succeeds
+
+        if (!response.ok) {
+          if (response.status === 502 && attempt < retries) {
+            console.log(
+              `502 error on attempt ${attempt}, retrying in 3 seconds...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            continue;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        console.log("N8n workflow completed successfully");
+
+        return {
+          ...result,
+          status: "workflow_completed",
+          completedAt: new Date().toISOString(),
+        };
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log(`Request timed out on attempt ${attempt}`);
+        }
+
+        if (attempt === retries) {
+          console.error("All retry attempts failed:", err);
+          throw err;
+        }
+        console.log(`Attempt ${attempt} failed, retrying...`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
-
-      const result = await response.text();
-      return result;
-    } catch (err) {
-      console.error("Error sending to n8n:", err);
-      throw err;
     }
   };
 
@@ -232,15 +262,30 @@ const AIAdvisoryInterface = () => {
       setIsTyping(false);
 
       // Add AI response
+      const n8nResponse = response; // This is your array from n8n
+      const firstItem = n8nResponse?.[0]; // Get the first object from the array
+
+      const pdfUrl = firstItem?.url;
+      const fileName = firstItem?.name;
+      const status = firstItem?.status;
+
+      // Create a proper message based on the n8n response
+      let messageContent;
+      if (firstItem?.error === false && status === 200) {
+        messageContent = `I've completed the analysis of your request. Your ${fileName} has been generated successfully and is ready for download.`;
+      } else {
+        messageContent =
+          "I've completed the analysis, but there was an issue generating the report.";
+      }
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         content:
-          response ||
-          "I've completed the analysis of your request. The insights have been processed and recommendations have been generated based on your company's data and current market conditions.",
+          messageContent +
+          (pdfUrl ? `\n\n🔗 [Download PDF Report](${pdfUrl})` : ""),
         sender: "ai",
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, aiMessage]);
 
       toast({
