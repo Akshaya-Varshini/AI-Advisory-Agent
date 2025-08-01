@@ -182,7 +182,7 @@ const AIAdvisoryInterface = () => {
 
         return {
           ...result,
-          status: "workflow_completed",
+          status: 200,
           completedAt: new Date().toISOString(),
         };
       } catch (err) {
