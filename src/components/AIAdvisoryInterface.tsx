@@ -266,9 +266,15 @@ const AIAdvisoryInterface = () => {
       const pdfUrl = result?.url;
       const fileName = result?.name;
       const status = result?.status;
-
       let messageContent;
-      if (result?.error === false && status === 200) {
+      console.log("Final Result Object:", result);
+      console.log("Parsed Status:", result?.status, typeof result?.status);
+
+      if (
+        result?.error === false &&
+        Number(result?.status) === 200 &&
+        result?.url
+      ) {
         messageContent = `I've completed the analysis of your request. Your ${fileName} has been generated successfully and is ready for download.`;
       } else {
         messageContent =
