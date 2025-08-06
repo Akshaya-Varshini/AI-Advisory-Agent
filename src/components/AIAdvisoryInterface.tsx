@@ -151,7 +151,7 @@ const AIAdvisoryInterface = () => {
         const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 min timeout
 
         const response = await fetch(
-          "https://n8n.estdev.cloud/webhook/8d5563f9-d123-4b03-8de5-923dce86e6d8",
+          "https://n8n.estdev.cloud/webhook/8bb41a9f-6d8c-41c0-af7d-d7de0850f996",
           {
             method: "POST",
             headers: {
